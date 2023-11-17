@@ -1,0 +1,51 @@
+version: '3.9'
+services:
+  vprodb:
+    build:
+      context: ./Docker-files/db
+    image: wendyeche/vprofiledb
+    container_name: "vprodb"  
+    ports:
+      - "3306:3306"
+    volumes:
+      - vprodbdata:/var/lib/mysql
+    environment:
+      - MY_ROOT_PASSWORD=vprodbpass
+
+  vprocache01:
+    image: memcached
+    ports:
+      - "11211:11211"    
+
+  vprovpromq01:
+    image: rabbitmq
+    container_name: "vprovpromq01"
+    ports:
+      - "15672:15672"
+    environment:
+      - RABBITMQ_DEFAULT_USER=guest 
+      - RABBITMQ_DEFAULT_PASS=guest 
+
+  vproapp:
+    build:
+      context: ./Docker-files/app
+    image: wendyeche/vprofileapp
+    container_name: "vproapp"
+    ports:
+      - "8080:8080"
+    volumes:
+      - vproappdata:/usr/local/tomcat/webapps
+    environment:
+      - MY_ROOT_PASSWORD=vprodbpass      
+
+  vproweb:
+    build:
+      context: ./Docker-files/web
+    image: wendyeche/vprofileweb
+    container_name: "vproweb"
+    ports:
+      - "80:80"
+
+volumes:
+  vprodbdata: {}
+  vproappdata: {}
